@@ -251,44 +251,46 @@ create_config() {
     print_info "Creating config package..."
 
     cat > "$project_dir/config/config.go" << EOF
-package config
+    package config
 
-import (
+    import (
 	"fmt"
 	"os"
 	"sync"
 
 	z "github.com/Oudwins/zog"
 	"github.com/Oudwins/zog/zenv"
+	"github.com/ekediala/read-later-api/internal"
 	"github.com/joho/godotenv"
-	"$module_name/internal"
-)
+    )
 
-var (
+    var (
 	config Config
 	err    error
 	once   sync.Once
-)
+    )
 
-type Config struct {
-	Env                string \`env:"Env" zog:"Env"\`
-	Port               int    \`env:"PORT" zog:"Port"\`
-	FrontendURL        string \`env:"FRONTEND_URL" zog:"FrontendURL"\`
-	DBURL              string \`env:"DB_URL" zog:"DBURL"\`
-	DBPassword         string \`env:"DB_PASSWORD" zog:"DBPassword"\`
-	JwtSecret          string \`env:"JWT_SECRET" zog:"JwtSecret"\`
-	SupabaseProjectURL string \`env:"SUPABASE_PROJECT_URL" zog:"SupabaseProjectURL"\`
-	SupabaseAPIKey     string \`env:"SUPABASE_API_KEY" zog:"SupabaseAPIKey"\`
-}
+    type Config struct {
+	Env                string `env:"Env" zog:"Env"`
+	Port               int    `env:"PORT" zog:"Port"`
+	FrontendURL        string `env:"FRONTEND_URL" zog:"FrontendURL"`
+	DBURL              string `env:"DB_URL" zog:"DBURL"`
+	DBPassword         string `env:"DB_PASSWORD" zog:"DBPassword"`
+	JwtSecret          string `env:"JWT_SECRET" zog:"JwtSecret"`
+	SupabaseProjectURL string `env:"SUPABASE_PROJECT_URL" zog:"SupabaseProjectURL"`
+	SupabaseAPIKey     string `env:"SUPABASE_API_KEY" zog:"SupabaseAPIKey"`
+    }
 
-const (
+    const (
 	DefaultPort     = 8080
 	DevEnvironment  = "development"
 	ProdEnvironment = "production"
-)
+    )
 
-func loadConfig() (Config, error) {
-	if os.Getenv("Env") == DevEnvironment {
+    var environments = []string{DevEnvironment, ProdEnvironment}
+
+    func loadConfig() (Config, error) {
+	if os.Getenv("Env") != DevEnvironment {
 		if err := godotenv.Load(); err != nil {
 			return Config{}, fmt.Errorf("loading environment variables: %w", err)
 		}
@@ -296,32 +298,33 @@ func loadConfig() (Config, error) {
 
 	schema := z.Struct(z.Shape{
 		"Port":               z.Int().Default(DefaultPort),
-		"Env":                z.String().Required().OneOf([]string{DevEnvironment, ProdEnvironment}),
-		"FrontendURL":        z.String().URL().Required(),
-		"DBURL":              z.String().URL().Required(),
-		"DBPassword":         z.String().Required(),
-		"JwtSecret":          z.String().Required(),
-		"SupabaseProjectURL": z.String().URL().Required(),
-		"SupabaseAPIKey":     z.String().Required(),
+		"Env":                z.String().Required(z.Message("Env is required")).OneOf(environments, z.Message(fmt.Sprintf("must be one of: %v", environments))),
+		"FrontendURL":        z.String().URL(z.Message("must be a valid URL")).Required(z.Message("Frontend URL is required")),
+		"DBURL":              z.String().URL(z.Message("must be a valid URL")).Required(z.Message("Database URL is required")),
+		"DBPassword":         z.String().Required(z.Message("Database password is required")),
+		"JwtSecret":          z.String().Required(z.Message("JWT secret is required")),
+		"SupabaseProjectURL": z.String().URL(z.Message("must be a valid URL")).Required(z.Message("Supabase project URL is required")),
+		"SupabaseAPIKey":     z.String().Required(z.Message("Supabase API key is required")),
 	})
 
 	var c Config
 
 	errs := schema.Parse(zenv.NewDataProvider(), &c)
 	if len(errs) != 0 {
-		return c, fmt.Errorf("loading config: %w", internal.ValidationError(errs))
+		err := internal.ValidationError(errs)
+		return c, fmt.Errorf("loading config: %v", err.RawErrors())
 	}
 
 	return c, nil
-}
+    }
 
-func LoadConfig() (Config, error) {
+    func LoadConfig() (Config, error) {
 	once.Do(func() {
 		config, err = loadConfig()
 	})
 
 	return config, err
-}
+    }
 EOF
 
     print_success "config package created"
