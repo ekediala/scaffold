@@ -12,7 +12,7 @@ import (
 //go:embed scaffold.sh
 var scaffoldScript string
 
-const version = "1.0.3"
+const version = "1.0.4"
 
 func main() {
 	var (

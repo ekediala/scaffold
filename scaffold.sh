@@ -260,7 +260,7 @@ create_config() {
 
 	z "github.com/Oudwins/zog"
 	"github.com/Oudwins/zog/zenv"
-	"github.com/ekediala/read-later-api/internal"
+	"$module_name/internal"
 	"github.com/joho/godotenv"
     )
 
