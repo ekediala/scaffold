@@ -18,7 +18,7 @@ A powerful command-line tool that generates a complete, production-ready Go API 
 ### Install as CLI Tool
 
 ```bash
-go install github.com/ekediala/scaffold@main
+go install github.com/ekediala/scaffold@latest
 ```
 
 ### Build from Source
