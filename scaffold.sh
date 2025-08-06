@@ -290,7 +290,10 @@ create_config() {
     var environments = []string{DevEnvironment, ProdEnvironment}
 
     func loadConfig() (Config, error) {
-	if os.Getenv("Env") != ProdEnvironment {
+    // we try to look up an environment variable.
+	// on local machines, it would not exist
+	// as .env hasn't been loaded.
+	if _, ok := os.LookupEnv("Env"); !ok {
 		if err := godotenv.Load(); err != nil {
 			return Config{}, fmt.Errorf("loading environment variables: %w", err)
 		}
