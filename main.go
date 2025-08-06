@@ -1,18 +1,20 @@
 package main
 
 import (
+	"bufio"
 	_ "embed"
 	"flag"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 //go:embed scaffold.sh
 var scaffoldScript string
 
-const version = "1.0.5"
+const version = "1.0.6"
 
 func main() {
 	var (
@@ -36,6 +38,25 @@ func main() {
 
 	// Get remaining arguments after flags
 	args := flag.Args()
+
+	// Check if project directory already exists
+	if len(args) > 0 {
+		projectName := filepath.Base(args[0])
+		if _, err := os.Stat(projectName); err == nil {
+			fmt.Printf("⚠️  Directory '%s' already exists.\n", projectName)
+			if !confirmOverwrite() {
+				fmt.Println("❌ Operation cancelled.")
+				os.Exit(0)
+			}
+			// Remove existing directory
+			err := os.RemoveAll(projectName)
+			if err != nil {
+				fmt.Printf("Error removing existing directory: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Printf("✅ Removed existing directory '%s'\n", projectName)
+		}
+	}
 
 	// Create temporary script file
 	tmpDir, err := os.MkdirTemp("", "scaffold")
@@ -90,4 +111,28 @@ EXAMPLES:
 
 For more information, visit: https://github.com/ekediala/scaffold
 `, version)
+}
+
+func confirmOverwrite() bool {
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		fmt.Print("Do you want to overwrite it? (y/N): ")
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("Error reading input: %v\n", err)
+			return false
+		}
+
+		response = strings.TrimSpace(strings.ToLower(response))
+
+		switch response {
+		case "y", "yes":
+			return true
+		case "n", "no", "":
+			return false
+		default:
+			fmt.Println("Please enter 'y' for yes or 'n' for no.")
+		}
+	}
 }

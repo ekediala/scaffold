@@ -271,14 +271,14 @@ create_config() {
     )
 
     type Config struct {
-	Env                string `env:"Env" zog:"Env"`
-	Port               int    `env:"PORT" zog:"Port"`
-	FrontendURL        string `env:"FRONTEND_URL" zog:"FrontendURL"`
-	DBURL              string `env:"DB_URL" zog:"DBURL"`
-	DBPassword         string `env:"DB_PASSWORD" zog:"DBPassword"`
-	JwtSecret          string `env:"JWT_SECRET" zog:"JwtSecret"`
-	SupabaseProjectURL string `env:"SUPABASE_PROJECT_URL" zog:"SupabaseProjectURL"`
-	SupabaseAPIKey     string `env:"SUPABASE_API_KEY" zog:"SupabaseAPIKey"`
+	Env                string \`env:"Env" zog:"Env"\`
+	Port               int    \`env:"PORT" zog:"Port"\`
+	FrontendURL        string \`env:"FRONTEND_URL" zog:"FrontendURL"\`
+	DBURL              string \`env:"DB_URL" zog:"DBURL"\`
+	DBPassword         string \`env:"DB_PASSWORD" zog:"DBPassword"\`
+	JwtSecret          string \`env:"JWT_SECRET" zog:"JwtSecret"\`
+	SupabaseProjectURL string \`env:"SUPABASE_PROJECT_URL" zog:"SupabaseProjectURL"\`
+	SupabaseAPIKey     string \`env:"SUPABASE_API_KEY" zog:"SupabaseAPIKey"\`
     }
 
     const (
@@ -399,6 +399,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/Oudwins/zog"
 	"github.com/Oudwins/zog/zconst"
@@ -407,7 +408,13 @@ import (
 type ValidationError zog.ZogIssueMap
 
 func (v ValidationError) Error() string {
-	return "Incorrect or missing form data."
+    var errors []string
+	for key, values := range zog.Issues.SanitizeMap(v) {
+		if key != zconst.ISSUE_KEY_FIRST {
+			errors = append(errors, values...)
+		}
+	}
+	return strings.Join(errors, ", ")
 }
 
 func (v ValidationError) RawErrors() []string {
