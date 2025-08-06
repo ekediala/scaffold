@@ -1,6 +1,6 @@
-# 🚀 Go API Scaffolding Tool
+# Go API Scaffolding Tool
 
-A powerful command-line tool that generates a complete, production-ready Go API project with best practices, database integration, middleware, and CI/CD setup.
+A powerful command-line tool that generates a complete, production-ready Go API project with best practices, minimal dependencies, database integration, middleware, and CI/CD setup. We try to use the standard library wherever possible. At the moment only zog for validation, pgx/v5 for database connections, uuid, golang-jwt, and godotenv for loading environment variables are included. Middleware and routing are handled using the standard library.
 
 ## Features
 
@@ -177,11 +177,9 @@ Push to the `main` branch to trigger automatic deployment.
 
 The scaffolding tool installs these key dependencies:
 
-- **Web Framework**: Gorilla Mux for HTTP routing
 - **Database**: PostgreSQL driver and SQLC for type-safe queries
 - **Authentication**: JWT-go for token handling
 - **Configuration**: Godotenv for environment variables
-- **CORS**: Gorilla handlers for CORS middleware
 - **Migrations**: golang-migrate for database migrations
 
 ## Optional Tools
@@ -207,11 +205,162 @@ go install github.com/air-verse/air@latest
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+We welcome contributions to the Go API Scaffolding Tool! Here's how to get started:
+
+### Development Setup
+
+1. **Fork the repository**
+   ```bash
+   git clone https://github.com/your-username/scaffold.git
+   cd scaffold
+   ```
+
+2. **Install dependencies**
+   ```bash
+   go mod tidy
+   ```
+
+3. **Make the script executable**
+   ```bash
+   chmod +x scaffold.sh
+   ```
+
+4. **Test your changes locally**
+   ```bash
+   go run main.go -h
+   go run main.go github.com/test/project
+   ```
+
+### Making Changes
+
+1. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes**
+   - Edit `scaffold.sh` for scaffolding logic changes
+   - Edit `main.go` for CLI interface changes
+   - Update `README.md` for documentation changes
+
+3. **Test thoroughly**
+   - Test the CLI flags (`-h`, `-v`)
+   - Test with and without module name arguments
+   - Verify generated projects compile and run
+   - Test on different operating systems if possible
+
+4. **Commit your changes**
+   ```bash
+   git add .
+   git commit -m "feat: add your feature description"
+   ```
+
+5. **Push and create pull request**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+### Code Guidelines
+
+- Follow Go conventions and best practices
+- Keep shell script functions focused and well-documented
+- Maintain backward compatibility when possible
+- Add error handling for edge cases
+- Update documentation for any new features
+
+### Testing Generated Projects
+
+When making changes to the scaffolding logic, always test that generated projects:
+
+1. Compile successfully: `go build -o bin .`
+2. Pass basic tests: `go test ./...`
+3. Have valid dependencies: `go mod tidy && go mod verify`
+4. Follow Go project structure conventions
+
+## Version Tagging
+
+This project uses semantic versioning. Here's how to create and publish new versions:
+
+### Creating a New Version
+
+1. **Determine version bump**
+   - **Patch** (1.0.x): Bug fixes, small improvements
+   - **Minor** (1.x.0): New features, backward compatible
+   - **Major** (x.0.0): Breaking changes
+
+2. **Update version in code**
+   ```bash
+   # Edit main.go and update the version constant
+   const version = "1.1.0"  # Update this line
+   ```
+
+3. **Commit version bump**
+   ```bash
+   git add main.go
+   git commit -m "bump version to v1.1.0"
+   git push origin main
+   ```
+
+4. **Create and push tag**
+   ```bash
+   git tag v1.1.0
+   git push origin v1.1.0
+   ```
+
+### Version Tag Format
+
+- Use semantic versioning: `vMAJOR.MINOR.PATCH`
+- Examples: `v1.0.0`, `v1.2.3`, `v2.0.0`
+- Always prefix with `v`
+
+### Publishing Process
+
+1. **Automated via tags**: Once you push a tag, users can install with:
+   ```bash
+   go install github.com/ekediala/scaffold@v1.1.0
+   go install github.com/ekediala/scaffold@latest  # installs latest tag
+   ```
+
+2. **GitHub Releases**: Create a GitHub release for the tag with:
+   - Release notes describing changes
+   - Binary attachments (if applicable)
+   - Migration instructions (for breaking changes)
+
+### Pre-release Versions
+
+For beta or release candidate versions:
+
+```bash
+git tag v1.1.0-beta.1
+git tag v1.1.0-rc.1
+git push origin v1.1.0-beta.1
+```
+
+Users can install pre-releases with:
+```bash
+go install github.com/ekediala/scaffold@v1.1.0-beta.1
+```
+
+### Example Release Workflow
+
+```bash
+# 1. Make your changes and test
+go run main.go github.com/test/myproject
+
+# 2. Update version
+vim main.go  # Update version constant
+
+# 3. Commit and tag
+git add main.go
+git commit -m "bump version to v1.2.0"
+git push origin main
+git tag v1.2.0
+git push origin v1.2.0
+
+# 4. Verify installation works
+go install github.com/ekediala/scaffold@v1.2.0
+scaffold -v  # Should show v1.2.0
+```
 
 ## License
 
