@@ -14,7 +14,7 @@ import (
 //go:embed scaffold.sh
 var scaffoldScript string
 
-const version = "1.0.6"
+const version = "1.0.7"
 
 func main() {
 	var (
